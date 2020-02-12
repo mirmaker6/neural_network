@@ -41,6 +41,10 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
+def tanh(x):
+    return np.tanh(x)
+
+
 def ReLU(x):
     return x * (x > 0)
 
@@ -51,6 +55,10 @@ def sigmoid_deriv(x):
 
 def ReLU_deriv(x):
     return x > 0
+
+
+def tanh_deriv(x):
+    return 1 - np.square(x)
 
 def normalize(X, axis=-1, order=2):
     l2 = np.atleast_1d(np.linalg.norm(X, order, axis))
@@ -82,21 +90,21 @@ def main():
     w0 = 2 * np.random.random((4, 5)) - 1  # для входного слоя   - 4 входа, 3 выхода
     w1 = 2 * np.random.random((5, 3)) - 1  # для внутреннего слоя - 5 входов, 3 выхода
 
-    n = 0.01
+    n = 0.00001
     errors = []
 
-    for _ in tqdm(range(1000000)):
+    for _ in tqdm(range(100000)):
         # прямое распространение(feed forward)
         layer0 = X_train
-        layer1 = sigmoid(np.dot(layer0, w0))
-        layer2 = sigmoid(np.dot(layer1, w1))
+        layer1 = ReLU(np.dot(layer0, w0))
+        layer2 = ReLU(np.dot(layer1, w1))
 
         # обратное распространение(back propagation) с использованием градиентного спуска
         layer2_error = y_train - layer2
-        layer2_delta = layer2_error * sigmoid_deriv(layer2)
+        layer2_delta = layer2_error * ReLU_deriv(layer2)
 
         layer1_error = layer2_delta.dot(w1.T)
-        layer1_delta = layer1_error * sigmoid_deriv(layer1)
+        layer1_delta = layer1_error * ReLU_deriv(layer1)
 
         w1 += layer1.T.dot(layer2_delta) * n
         w0 += layer0.T.dot(layer1_delta) * n
@@ -104,7 +112,6 @@ def main():
         error = np.mean(np.abs(layer2_error))
         errors.append(error)
         accuracy = (1 - error) * 100
-
 
     plt.plot(errors)
     plt.xlabel('Обучение')
