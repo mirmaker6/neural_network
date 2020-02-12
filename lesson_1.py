@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 # Python 3
 
-'''
-Исходный код к уроку 1.
-Построение двухслойной нейронный сети для классификации цветков ириса
-'''
+# Исходный код к уроку 1.
+# Построение двухслойной нейронный сети для классификации цветков ириса
 
 import numpy as np
 import pandas as pd
@@ -60,6 +58,7 @@ def ReLU_deriv(x):
 def tanh_deriv(x):
     return 1 - np.square(x)
 
+
 def normalize(X, axis=-1, order=2):
     l2 = np.atleast_1d(np.linalg.norm(X, order, axis))
     l2[l2 == 0] = 1
@@ -90,21 +89,21 @@ def main():
     w0 = 2 * np.random.random((4, 5)) - 1  # для входного слоя   - 4 входа, 3 выхода
     w1 = 2 * np.random.random((5, 3)) - 1  # для внутреннего слоя - 5 входов, 3 выхода
 
-    n = 0.00001
+    n = 0.01
     errors = []
 
-    for _ in tqdm(range(100000)):
+    for _ in tqdm(range(1000000)):
         # прямое распространение(feed forward)
         layer0 = X_train
-        layer1 = ReLU(np.dot(layer0, w0))
-        layer2 = ReLU(np.dot(layer1, w1))
+        layer1 = sigmoid(np.dot(layer0, w0))
+        layer2 = sigmoid(np.dot(layer1, w1))
 
         # обратное распространение(back propagation) с использованием градиентного спуска
         layer2_error = y_train - layer2
-        layer2_delta = layer2_error * ReLU_deriv(layer2)
+        layer2_delta = layer2_error * sigmoid_deriv(layer2)
 
         layer1_error = layer2_delta.dot(w1.T)
-        layer1_delta = layer1_error * ReLU_deriv(layer1)
+        layer1_delta = layer1_error * sigmoid_deriv(layer1)
 
         w1 += layer1.T.dot(layer2_delta) * n
         w0 += layer0.T.dot(layer1_delta) * n
@@ -118,7 +117,7 @@ def main():
     plt.ylabel('Ошибка')
     plt.show()  # расскоментируйте, чтобы посмотреть
 
-    print("Точность нейронной сети " + str(round(accuracy, 2)) + "%")
+    print(f'Точность нейронной сети {round(accuracy, 2)}%')
 
 
 if __name__ == '__main__':
